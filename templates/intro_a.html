@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<title>Stock Ticker</title>
+<link rel=stylesheet type=text/css href='{{ url_for('static',filename='style_lulu.css')}}'>
+<div class=page>
+  <h1>Please enter the symbol and data for your desired stock.
+  </h1>
+  <div class=metanav>
+
+
+<h4>
+<form id='ticker_type' method='post' action='/' > <!-- action must match your next URL -->
+   <p>
+   Ticker Symbol: <input type ='text' name='symbol'/>    
+   </p>
+    <p>
+   Data to display (choose only one): <br />
+   <input type='radio' name='dat' value={{ans1}} /> {{ans1}} <br />
+   <input type='radio' name='dat' value={{ans2}} /> {{ans2}} <br />
+   <input type='radio' name='dat' value={{ans3}} /> {{ans3}} <br />
+   <input type='radio' name='dat' value={{ans4}} /> {{ans4}} <br />
+   </p>
+   <p>
+       Note: Please only submit after both entering a stock symbol and choosing a data type!
+   </p>
+   <p>    
+   <input type='submit' value='Submit' /> <!--the 'value' is the word that will appear on your button.-->
+   </p>
+</form>
+</h4>
+
+</div>
+</div>
+</html>
