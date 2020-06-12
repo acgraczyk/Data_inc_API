@@ -1,17 +1,45 @@
 from flask import Flask, render_template, request
+import json
 import requests
 import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
-from bokeh.plotting import figure, output_file, show 
+from bokeh.plotting import figure, output_file, show, save 
 from bokeh.models.formatters import DatetimeTickFormatter
 import math
 from bokeh.models import HoverTool 
+from bokeh.embed import json_item, components
+from bokeh.resources import CDN
+from jinja2 import Template
 
 
 
 app = Flask(__name__)
 
+
+page = Template("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-2.0.2.min.css" type="text/css" />
+  <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-2.0.2.min.js"></script>
+</head>
+
+<body>
+<p>The daily {{ dat }} price for {{ sym }} : </p>
+  <div id="myplot"></div>
+  <script>
+  fetch('/test')
+    .then(function(response) { return response.json(); })
+    .then(function(item) { return Bokeh.embed.embed_item(item); })
+  </script>
+  
+</body>
+""")
+
+
+
+app.vars={}
 
 @app.route('/', methods=['GET','POST'])
 def intro():
@@ -21,26 +49,31 @@ def intro():
     
   else:
    
-   sym=request.form['symbol']
-   dat=request.form['dat']
+   app.vars['sym']=request.form['symbol']
+   app.vars['dat']=request.form['dat']
    
-   graph_test(sym,dat)
    
+   fig = graph_test()
 
-   return render_template('display_a.html',symbol=sym, dat_type=dat)
+   script, div  = components(fig)
+
+   return render_template('display.html', sym=app.vars['sym'], dat=app.vars['dat'], script=script, div=div)
+  # return page.render(resources=CDN.render(), sym=app.vars['sym'], dat=app.vars['dat'])
 
 
 
 
 @app.route('/test')
-def graph_test(sym,dat):
+def graph_test():
+    sym = app.vars['sym']
+    dat = app.vars['dat']
     api_key = '2WO8P8MYSVYSE8LO'
     ts = TimeSeries(api_key, output_format='pandas')
     sym_data, sym_meta_data = ts.get_daily(symbol=sym)
     
     sym_data.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
 
-
+    #output_file('tmp/moog.html', mode="inline")
     if dat == 'Closing':
       p = figure(tools="pan,box_zoom,reset,save", title="Stock Daily Closing Prices" , x_axis_label='Time', y_axis_label="Daily Closing Prices" )   
       p.line(x='date',y='Close', source=sym_data, legend_label=sym,line_width=2)
@@ -119,8 +152,9 @@ def graph_test(sym,dat):
 
     
     p.xaxis.major_label_orientation = math.pi/2
-    
-    return show(p)
+    #save(p)
+    return p
+    #return json.dumps(json_item(p, "myplot"))
 
 
 

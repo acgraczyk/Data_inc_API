@@ -2,8 +2,7 @@ pandas
 bokeh
 dill
 flask
-jinja2
 pip
-simplejson
 math
 json
+jinja2
