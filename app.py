@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import json
 import requests
 import pandas as pd
@@ -66,8 +66,10 @@ def intro():
 @app.route('/test')
 def graph_test():
     sym = app.vars['sym']
+    sym.upper()
     dat = app.vars['dat']
     api_key = '2WO8P8MYSVYSE8LO'
+
     ts = TimeSeries(api_key, output_format='pandas')
     sym_data, sym_meta_data = ts.get_daily(symbol=sym)
     
@@ -157,7 +159,18 @@ def graph_test():
     #return json.dumps(json_item(p, "myplot"))
 
 
+@app.errorhandler(500)
+def error_500(error):
+  return render_template('error_handle.html')
 
+@app.errorhandler(404)
+def error_400(error):
+  return render_template('error_handle.html')
+
+@app.errorhandler(400)
+def error_404(error):
+  return render_template('error_handle.html')
+  
 
 if __name__ == '__main__':
   app.run(port=33507)
